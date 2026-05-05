@@ -1,0 +1,36 @@
+// criar variavel para a pergunta, util para token no futuro
+@txt = "O que é o Docker3?"
+
+###
+
+### Listar todas as FAQs
+GET http://localhost:8080/api/faqs
+
+###
+
+### Criar uma nova FAQ
+POST http://localhost:8080/api/faqs
+Content-Type: application/json
+
+{
+  "question": {{txt}},
+  "answer": "Uma plataforma para criar, rodar e distribuir aplicativos em containers isolados.",
+  "is_premium": false
+}
+
+###
+
+### Deletar uma FAQ pelo ID
+DELETE http://localhost:8080/api/faqs/9
+
+###
+
+### Atualizar uma FAQ existente
+PUT http://localhost:8080/api/faqs/1
+Content-Type: application/json
+
+{
+  "question": "O que é o Golang? (Editado!)",
+  "answer": "Uma linguagem rápida, compilada e construída para altíssima concorrência.",
+  "is_premium": true
+}

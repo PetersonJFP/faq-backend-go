@@ -1,0 +1,11 @@
+# Arquivos de build/compilação do Go e do Air
+tmp/
+bin/
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos grandes e compactados
+*.tar.gz
+*.zip
