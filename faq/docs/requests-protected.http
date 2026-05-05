@@ -1,0 +1,21 @@
+// Variáveis de Ambiente
+@baseUrl = http://localhost:8080/api/faqs
+// COPIE O TOKEN DO LOGIN AQUI
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgwOTE2MTUsInVzZXJfaWQiOjF9.ij-7Z0y5agyd-lwZDILgVJBOJdANa4MNVpyGaBUr6Kg
+
+###
+// 1. Listar todas as FAQs (Público)
+GET {{baseUrl}}/
+Accept: application/json
+
+###
+// 2. Criar uma nova FAQ (Protegido - Necessita Token)
+POST {{baseUrl}}/
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "question": "Como funciona o JWT?",
+    "answer": "O token é validado pelo middleware antes de chegar ao handler.",
+    "is_premium": false
+}
