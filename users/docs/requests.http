@@ -1,0 +1,45 @@
+// Variáveis de Ambiente
+@baseUrl = http://localhost:8080/api
+
+###
+// 1. Registrar um novo usuário
+// Este comando envia os dados para criar o registro com senha criptografada
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "password": "senha_segura_123"
+}
+
+###
+// 2. Tentar registrar o mesmo email (Deve retornar erro 409)
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+  "name": "Outro João",
+  "email": "joao@email.com",
+  "password": "outra_senha"
+}
+
+###
+// 3. Realizar Login com sucesso
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "joao@email.com",
+  "password": "senha_segura_123"
+}
+
+###
+// 4. Realizar Login com senha errada (Deve retornar erro 401)
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+  "email": "joao@email.com",
+  "password": "senha_errada"
+}

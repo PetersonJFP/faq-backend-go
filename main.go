@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"app/faq"
+	"app/users"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -56,6 +57,9 @@ func main() {
 	// 4. Inicialização dos Módulos (Apps)
 	faqApp := faq.NewApp(dbConn)
 	faqApp.RegisterRoutes(r)
+
+	userApp := users.NewApp(dbConn)
+	userApp.RegisterRoutes(r)
 
 	// 5. Inicia o Servidor usando a porta do .env
 	port := os.Getenv("SERVER_PORT")
