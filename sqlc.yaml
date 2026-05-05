@@ -1,10 +1,10 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "sql/queries"
-    schema: "sql/schema"
+    schema: "faq/schema.sql"
+    queries: "faq/queries.sql"
     gen:
       go:
-        package: "db"
-        out: "internal/db"
-        emit_json_tags: true # <-- minusculas na hora de montar o json, por exemplo: "question" ao invés de "Question"
+        package: "faq"
+        out: "faq"
+        emit_json_tags: true

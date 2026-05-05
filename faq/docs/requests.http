@@ -21,7 +21,7 @@ Content-Type: application/json
 ###
 
 ### Deletar uma FAQ pelo ID
-DELETE http://localhost:8080/api/faqs/9
+DELETE http://localhost:8080/api/faqs/11
 
 ###
 
@@ -30,7 +30,7 @@ PUT http://localhost:8080/api/faqs/1
 Content-Type: application/json
 
 {
-  "question": "O que é o Golang? (Editado!)",
+  "question": "O que é o Golang? (Edit 2!)",
   "answer": "Uma linguagem rápida, compilada e construída para altíssima concorrência.",
   "is_premium": true
 }

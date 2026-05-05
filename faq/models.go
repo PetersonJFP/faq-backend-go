@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.31.1
 
-package db
+package faq
 
 type Faq struct {
 	ID        int32  `json:"id"`
