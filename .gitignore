@@ -9,3 +9,6 @@ Thumbs.db
 # Arquivos grandes e compactados
 *.tar.gz
 *.zip
+
+#env
+.env
