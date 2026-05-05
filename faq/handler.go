@@ -7,18 +7,20 @@ import (
 	"net/http"
 	"strconv"
 
+	"faq-backend/faq/db"
+
 	"github.com/go-chi/chi/v5"
 )
 
 // App encapsula as dependências deste módulo (ex: acesso ao banco de dados).
 type App struct {
-	Queries *Queries // Gerado pelo SQLC
+	Queries *db.Queries // Gerado pelo SQLC
 }
 
 // NewApp é o construtor do nosso módulo FAQ.
-func NewApp(db *sql.DB) *App {
+func NewApp(conn *sql.DB) *App {
 	return &App{
-		Queries: New(db),
+		Queries: db.New(conn),
 	}
 }
 
@@ -47,7 +49,7 @@ func (a *App) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	novoFaq, err := a.Queries.CreateFAQ(context.Background(), CreateFAQParams{
+	novoFaq, err := a.Queries.CreateFAQ(context.Background(), db.CreateFAQParams{
 		Question:  body.Question,
 		Answer:    body.Answer,
 		IsPremium: body.IsPremium,
@@ -81,7 +83,7 @@ func (a *App) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	faqAtualizada, err := a.Queries.UpdateFAQ(context.Background(), UpdateFAQParams{
+	faqAtualizada, err := a.Queries.UpdateFAQ(context.Background(), db.UpdateFAQParams{
 		ID:        int32(id),
 		Question:  body.Question,
 		Answer:    body.Answer,
