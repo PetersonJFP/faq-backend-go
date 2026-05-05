@@ -26,9 +26,14 @@ func main() {
 
 	dbConn, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatalf("Erro banco: %v\n", err)
+		log.Fatalf("Erro ao conectar no banco de dados: %v\n", err)
 	}
 	defer dbConn.Close()
+
+	// Verificar se a conexão está ativa
+	if err := dbConn.Ping(); err != nil {
+		log.Fatalf("Não foi possível alcançar o banco de dados: %v\n", err)
+	}
 
 	r := chi.NewRouter()
 
@@ -42,24 +47,14 @@ func main() {
 	faqApp := faq.NewApp(dbConn)
 	userApp := users.NewApp(dbConn)
 
+	faqApp.RegisterRoutes(r, users.AuthMiddleware)
 	userApp.RegisterRoutes(r)
-
-	r.Route("/api/faqs", func(router chi.Router) {
-		router.Get("/", faqApp.List)
-
-		router.Group(func(protected chi.Router) {
-			protected.Use(users.AuthMiddleware)
-			protected.Post("/", faqApp.Create)
-			protected.Put("/{id}", faqApp.Update)
-			protected.Delete("/{id}", faqApp.Delete)
-		})
-	})
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	fmt.Printf("🚀 Servidor rodando em http://localhost:%s\n", port)
+	fmt.Printf("🚀 Servidor Go rodando na porta %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

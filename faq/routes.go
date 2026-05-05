@@ -1,14 +1,23 @@
 package faq
 
-import "github.com/go-chi/chi/v5"
+import (
+	"net/http"
 
-// RegisterRoutes cria o agrupamento de rotas e liga aos handlers.
-func (a *App) RegisterRoutes(r chi.Router) {
-	// Cria um sub-roteador para agrupar tudo que começa com /api/faqs
+	"github.com/go-chi/chi/v5"
+)
+
+// RegisterRoutes agora recebe o authMiddleware para proteger rotas específicas internamente
+func (a *App) RegisterRoutes(r chi.Router, authMiddleware func(http.Handler) http.Handler) {
 	r.Route("/api/faqs", func(router chi.Router) {
+		// Rotas Públicas
 		router.Get("/", a.List)
-		router.Post("/", a.Create)
-		router.Put("/{id}", a.Update)
-		router.Delete("/{id}", a.Delete)
+
+		// Rotas Protegidas
+		router.Group(func(protected chi.Router) {
+			protected.Use(authMiddleware)
+			protected.Post("/", a.Create)
+			protected.Put("/{id}", a.Update)
+			protected.Delete("/{id}", a.Delete)
+		})
 	})
 }

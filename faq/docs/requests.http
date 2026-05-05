@@ -1,36 +1,50 @@
-// criar variavel para a pergunta, util para token no futuro
-@txt = "O que é o Docker3?"
+// Variáveis de Ambiente
+@baseUrl = http://localhost:8080/api/faqs
+// COPIE O TOKEN DO LOGIN AQUI
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgwOTE2MTUsInVzZXJfaWQiOjF9.ij-7Z0y5agyd-lwZDILgVJBOJdANa4MNVpyGaBUr6Kg
 
 ###
-
-### Listar todas as FAQs
-GET http://localhost:8080/api/faqs
+// 1. Listar todas as FAQs (Público)
+GET {{baseUrl}}/
+Accept: application/json
 
 ###
-
-### Criar uma nova FAQ
-POST http://localhost:8080/api/faqs
+// 2. Criar uma nova FAQ (Protegido - Necessita Token)
+POST {{baseUrl}}/
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "question": {{txt}},
-  "answer": "Uma plataforma para criar, rodar e distribuir aplicativos em containers isolados.",
-  "is_premium": false
+    "question": "Como funciona o JWT?",
+    "answer": "O token é validado pelo middleware antes de chegar ao handler.",
+    "is_premium": false
 }
 
 ###
-
-### Deletar uma FAQ pelo ID
-DELETE http://localhost:8080/api/faqs/11
-
-###
-
-### Atualizar uma FAQ existente
-PUT http://localhost:8080/api/faqs/1
+// 3. Atualizar uma FAQ (Protegido - Necessita Token)
+// Substitua o {id} pelo ID real do banco
+PUT {{baseUrl}}/16
+Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-  "question": "O que é o Golang? (Edit 2!)",
-  "answer": "Uma linguagem rápida, compilada e construída para altíssima concorrência.",
-  "is_premium": true
+    "question": "Pergunta Atualizada",
+    "answer": "Resposta atualizada via rota protegida.",
+    "is_premium": true
+}
+
+###
+// 4. Deletar uma FAQ (Protegido - Necessita Token)
+DELETE {{baseUrl}}/16
+Authorization: Bearer {{authToken}}
+
+###
+// 5. Teste de Falha: Tentar criar sem Token (Deve retornar 401)
+POST {{baseUrl}}/
+Content-Type: application/json
+
+{
+    "question": "Isto vai falhar?",
+    "answer": "Sim, falta o header de autorização.",
+    "is_premium": false
 }
