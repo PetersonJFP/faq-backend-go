@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"faq-backend/faq/db"
+	"app/faq/db"
 
 	"github.com/go-chi/chi/v5"
 )

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"faq-backend/faq"
+	"app/faq"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
