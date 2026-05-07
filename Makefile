@@ -30,9 +30,17 @@ dev: up
 	air
 
 # Roda todos os testes do projeto uma vez
+pkg ?= ...
+
 test:
-	go test -v ./...
+	go test -v ./$(pkg)
 
 # Modo TDD: Observa mudanças e roda os testes automaticamente via Air
+
+# Modo TDD: Agora aceita o argumento 'pkg'
+# Exemplo: make test-watch pkg=faq/
+
 test-watch:
-	air -c .air.test.conf
+	@# Se pkg for "...", o Air usa a config padrão.
+	@# Se pkg for algo específico, sobrescrevemos o comando do Air via variável de ambiente.
+	TEST_PKG=./$(pkg) air -c .air.test.conf
