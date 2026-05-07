@@ -15,14 +15,10 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-// tLogger é um wrapper que redireciona logs do Docker para o sistema de testes do Go.
-// Isto faz com que os logs só apareçam se o teste FALHAR.
-type tLogger struct {
-	t *testing.T
-}
+type silentLogger struct{}
 
-func (l tLogger) Printf(format string, v ...interface{}) {
-	l.t.Logf(format, v...)
+func (l silentLogger) Printf(format string, v ...interface{}) {
+	// Método vazio: ignora todos os logs de infraestrutura do Docker
 }
 
 func SetupTestContainer(ctx context.Context, t *testing.T) (*sql.DB, func()) {
@@ -31,8 +27,8 @@ func SetupTestContainer(ctx context.Context, t *testing.T) (*sql.DB, func()) {
 		postgres.WithDatabase("test_db"),
 		postgres.WithUsername("user"),
 		postgres.WithPassword("password"),
-		// Usamos o nosso logger customizado aqui
-		testcontainers.WithLogger(tLogger{t: t}),
+		// Usamos a nossa struct vazia para silenciar o progresso do Docker
+		testcontainers.WithLogger(silentLogger{}),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).
