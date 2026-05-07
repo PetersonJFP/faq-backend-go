@@ -28,3 +28,11 @@ generate:
 dev: up
 	@echo "🚀 Iniciando o servidor em modo de desenvolvimento..."
 	air
+
+# Roda todos os testes do projeto uma vez
+test:
+	go test -v ./...
+
+# Modo TDD: Observa mudanças e roda os testes automaticamente via Air
+test-watch:
+	air -c .air.test.conf
