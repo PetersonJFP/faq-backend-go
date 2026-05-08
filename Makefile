@@ -1,4 +1,4 @@
-.PHONY: setup up down dev generate
+.PHONY: setup up down dev generate test test-watch
 
 # Instala as ferramentas globais na máquina (Air e SQLC)
 setup:
