@@ -1,117 +1,77 @@
 package faq
 
 import (
-	"context"
+	"app/faq/db"
+	"app/internal/web" // Importando o novo utilitário
 	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"app/faq/db"
-
 	"github.com/go-chi/chi/v5"
 )
 
-// App encapsula as dependências deste módulo (ex: acesso ao banco de dados).
 type App struct {
-	Queries *db.Queries // Gerado pelo SQLC
+	Queries *db.Queries
 }
 
-// NewApp é o construtor do nosso módulo FAQ.
 func NewApp(conn *sql.DB) *App {
-	return &App{
-		Queries: db.New(conn),
-	}
+	return &App{Queries: db.New(conn)}
 }
 
-// List retorna todas as FAQs do banco.
 func (a *App) List(w http.ResponseWriter, r *http.Request) {
-	faqs, err := a.Queries.ListFAQs(context.Background())
+	faqs, err := a.Queries.ListFAQs(r.Context())
 	if err != nil {
-		http.Error(w, "Erro ao buscar as FAQs", http.StatusInternalServerError)
+		web.Error(w, http.StatusInternalServerError, "Erro ao buscar FAQs")
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(faqs)
+	web.JSON(w, http.StatusOK, faqs)
 }
 
-// Create recebe um JSON e cria uma nova FAQ.
 func (a *App) Create(w http.ResponseWriter, r *http.Request) {
-	var body struct {
-		Question  string `json:"question"`
-		Answer    string `json:"answer"`
-		IsPremium bool   `json:"is_premium"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "JSON inválido", http.StatusBadRequest)
+	var f db.CreateFAQParams
+	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
+		web.Error(w, http.StatusBadRequest, "Dados inválidos")
 		return
 	}
 
-	novoFaq, err := a.Queries.CreateFAQ(context.Background(), db.CreateFAQParams{
-		Question:  body.Question,
-		Answer:    body.Answer,
-		IsPremium: body.IsPremium,
-	})
+	faq, err := a.Queries.CreateFAQ(r.Context(), f)
 	if err != nil {
-		http.Error(w, "Erro ao salvar a FAQ", http.StatusInternalServerError)
+		web.Error(w, http.StatusInternalServerError, "Erro ao criar FAQ")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(novoFaq)
+	web.JSON(w, http.StatusCreated, faq)
 }
 
-// Update modifica uma FAQ existente usando o ID da URL.
 func (a *App) Update(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idParam)
+	idStr := chi.URLParam(r, "id")
+	id, _ := strconv.Atoi(idStr)
+
+	var f db.UpdateFAQParams
+	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
+		web.Error(w, http.StatusBadRequest, "Dados inválidos")
+		return
+	}
+	f.ID = int32(id)
+
+	faq, err := a.Queries.UpdateFAQ(r.Context(), f)
 	if err != nil {
-		http.Error(w, "ID inválido.", http.StatusBadRequest)
+		web.Error(w, http.StatusInternalServerError, "Erro ao atualizar FAQ")
 		return
 	}
 
-	var body struct {
-		Question  string `json:"question"`
-		Answer    string `json:"answer"`
-		IsPremium bool   `json:"is_premium"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "JSON inválido", http.StatusBadRequest)
-		return
-	}
-
-	faqAtualizada, err := a.Queries.UpdateFAQ(context.Background(), db.UpdateFAQParams{
-		ID:        int32(id),
-		Question:  body.Question,
-		Answer:    body.Answer,
-		IsPremium: body.IsPremium,
-	})
-	if err != nil {
-		http.Error(w, "Erro ao atualizar a FAQ", http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(faqAtualizada)
+	web.JSON(w, http.StatusOK, faq)
 }
 
-// Delete remove uma FAQ do banco pelo ID da URL.
 func (a *App) Delete(w http.ResponseWriter, r *http.Request) {
-	idParam := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(idParam)
-	if err != nil {
-		http.Error(w, "ID inválido.", http.StatusBadRequest)
+	idStr := chi.URLParam(r, "id")
+	id, _ := strconv.Atoi(idStr)
+
+	if err := a.Queries.DeleteFAQ(r.Context(), int32(id)); err != nil {
+		web.Error(w, http.StatusInternalServerError, "Erro ao deletar FAQ")
 		return
 	}
 
-	err = a.Queries.DeleteFAQ(context.Background(), int32(id))
-	if err != nil {
-		http.Error(w, "Erro ao deletar a FAQ", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
+	web.NoContent(w)
 }
