@@ -5,7 +5,6 @@ import (
 	"app/users/db"
 	"database/sql"
 	"net/http"
-	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -18,35 +17,36 @@ func NewApp(conn *sql.DB) *App {
 	return &App{Queries: db.New(conn)}
 }
 
-// UserResponse define o que enviamos para o frontend (Segurança)
 type UserResponse struct {
-	ID        int32     `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
+	ID    int32  `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
-// RegisterRequest define os dados necessários para cadastro
 type RegisterRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	// Usamos a tag 'label' para definir o nome amigável na mensagem de erro
+	Name     string `json:"name" validate:"required,min=3,max=100" label:"Nome"`
+	Email    string `json:"email" validate:"required,email" label:"E-mail"`
+	Password string `json:"password" validate:"required,min=6,max=32" label:"Senha"`
 }
 
-// LoginRequest define as credenciais de acesso (Necessário para os testes)
 type LoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email" label:"E-mail"`
+	Password string `json:"password" validate:"required" label:"Senha"`
 }
 
 func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 	if err := web.ReadJSON(r, &req); err != nil {
-		web.Error(w, http.StatusBadRequest, "Dados inválidos")
+		web.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		web.Error(w, http.StatusInternalServerError, "Erro ao processar segurança")
+		return
+	}
 
 	user, err := a.Queries.CreateUser(r.Context(), db.CreateUserParams{
 		Name:         req.Name,
@@ -55,32 +55,41 @@ func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		web.Error(w, http.StatusConflict, "Este email já está em uso")
+		web.Error(w, http.StatusConflict, "Este e-mail já está em uso")
 		return
 	}
 
 	web.JSON(w, http.StatusCreated, UserResponse{
-		ID:        user.ID,
-		Name:      user.Name,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt.Time,
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
 	})
 }
 
 func (a *App) Login(w http.ResponseWriter, r *http.Request) {
 	var req LoginRequest
 	if err := web.ReadJSON(r, &req); err != nil {
-		web.Error(w, http.StatusBadRequest, "Dados inválidos")
+		web.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user, err := a.Queries.GetUserByEmail(r.Context(), req.Email)
-	if err != nil || bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)) != nil {
-		web.Error(w, http.StatusUnauthorized, "Email ou senha incorretos")
+	if err != nil {
+		web.Error(w, http.StatusUnauthorized, "Credenciais inválidas")
 		return
 	}
 
-	token, _ := GenerateToken(user.ID)
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
+	if err != nil {
+		web.Error(w, http.StatusUnauthorized, "Credenciais inválidas")
+		return
+	}
+
+	token, err := GenerateToken(user.ID)
+	if err != nil {
+		web.Error(w, http.StatusInternalServerError, "Erro ao gerar acesso")
+		return
+	}
 
 	web.JSON(w, http.StatusOK, map[string]string{
 		"token": token,
