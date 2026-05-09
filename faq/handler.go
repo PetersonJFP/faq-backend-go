@@ -4,7 +4,6 @@ import (
 	"app/faq/db"
 	"app/internal/web" // Importando o novo utilitário
 	"database/sql"
-	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -30,7 +29,7 @@ func (a *App) List(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) Create(w http.ResponseWriter, r *http.Request) {
 	var f db.CreateFAQParams
-	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
+	if err := web.ReadJSON(r, &f); err != nil {
 		web.Error(w, http.StatusBadRequest, "Dados inválidos")
 		return
 	}
@@ -49,7 +48,7 @@ func (a *App) Update(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(idStr)
 
 	var f db.UpdateFAQParams
-	if err := json.NewDecoder(r.Body).Decode(&f); err != nil {
+	if err := web.ReadJSON(r, &f); err != nil {
 		web.Error(w, http.StatusBadRequest, "Dados inválidos")
 		return
 	}

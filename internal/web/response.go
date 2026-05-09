@@ -24,6 +24,11 @@ func Error(w http.ResponseWriter, status int, message string) {
 	JSON(w, status, ResponseError{Error: message})
 }
 
+// ReadJSON lê o corpo da requisição e decodifica para a struct destino
+func ReadJSON(r *http.Request, data interface{}) error {
+	return json.NewDecoder(r.Body).Decode(data)
+}
+
 // NoContent envia uma resposta de sucesso sem corpo (comum em DELETE)
 func NoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
