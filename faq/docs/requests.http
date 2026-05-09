@@ -1,7 +1,7 @@
 // Variáveis de Ambiente
 @baseUrl = http://localhost:8080/api/faqs
 // COPIE O TOKEN DO LOGIN AQUI
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzgwOTE2MTUsInVzZXJfaWQiOjF9.ij-7Z0y5agyd-lwZDILgVJBOJdANa4MNVpyGaBUr6Kg
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Nzg0MjIyOTUsInVzZXJfaWQiOjF9.BP9Ok37pX_1gAL7HbnWmMiqXkKQ4tbMGPhyf185rpyM
 
 ###
 // 1. Listar todas as FAQs (Público)
@@ -23,7 +23,7 @@ Content-Type: application/json
 ###
 // 3. Atualizar uma FAQ (Protegido - Necessita Token)
 // Substitua o {id} pelo ID real do banco
-PUT {{baseUrl}}/16
+PUT {{baseUrl}}/19
 Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
