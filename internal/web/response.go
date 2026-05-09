@@ -10,6 +10,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+// ResponseError define o contrato único de erro da API
 type ResponseError struct {
 	Error string `json:"error"`
 }
@@ -19,8 +20,6 @@ var validate *validator.Validate
 func init() {
 	validate = validator.New()
 
-	// Esta função ensina o validador a procurar a tag "label" na struct.
-	// Se não encontrar "label", ele tenta o "json". Se não tiver, usa o nome do campo.
 	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
 		name := fld.Tag.Get("label")
 		if name == "" {
@@ -41,7 +40,6 @@ func formatValidationError(err error) string {
 
 	var messages []string
 	for _, e := range errs {
-		// e.Field() agora retornará o valor da tag "label" ou "json"
 		field := e.Field()
 
 		switch e.Tag() {
@@ -60,12 +58,14 @@ func formatValidationError(err error) string {
 		}
 	}
 
+	// Retornamos apenas o primeiro erro para manter a resposta Flat e limpa
 	if len(messages) > 0 {
 		return messages[0]
 	}
 	return "Erro de validação"
 }
 
+// JSON envia uma resposta de sucesso
 func JSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -74,19 +74,24 @@ func JSON(w http.ResponseWriter, status int, data interface{}) {
 	}
 }
 
+// Error envia uma resposta de erro padronizada
 func Error(w http.ResponseWriter, status int, message string) {
 	JSON(w, status, ResponseError{Error: message})
 }
 
+// NoContent envia uma resposta vazia (comum em Deletes)
 func NoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// ReadJSON decodifica o corpo da requisição e valida as regras da struct
 func ReadJSON(r *http.Request, data interface{}) error {
+	// 1. Tenta decodificar o JSON
 	if err := json.NewDecoder(r.Body).Decode(data); err != nil {
 		return fmt.Errorf("JSON inválido: verifique a sintaxe")
 	}
 
+	// 2. Executa a validação baseada nas tags da struct
 	err := validate.Struct(data)
 	if err != nil {
 		return fmt.Errorf("%s", formatValidationError(err))

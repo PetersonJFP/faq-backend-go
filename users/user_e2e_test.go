@@ -29,7 +29,7 @@ func TestUser_E2E_AuthFlow(t *testing.T) {
 			"password": "password123",
 		}
 		regBody, _ := json.Marshal(regPayload)
-		
+
 		reqReg := httptest.NewRequest(http.MethodPost, "/api/users/register", bytes.NewBuffer(regBody))
 		rrReg := httptest.NewRecorder()
 		r.ServeHTTP(rrReg, reqReg)
@@ -42,7 +42,7 @@ func TestUser_E2E_AuthFlow(t *testing.T) {
 			"password": "password123",
 		}
 		loginBody, _ := json.Marshal(loginPayload)
-		
+
 		reqLogin := httptest.NewRequest(http.MethodPost, "/api/users/login", bytes.NewBuffer(loginBody))
 		rrLogin := httptest.NewRecorder()
 		r.ServeHTTP(rrLogin, reqLogin)
