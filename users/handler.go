@@ -17,24 +17,6 @@ func NewApp(conn *sql.DB) *App {
 	return &App{Queries: db.New(conn)}
 }
 
-type UserResponse struct {
-	ID    int32  `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-}
-
-type RegisterRequest struct {
-	// Usamos a tag 'label' para definir o nome amigável na mensagem de erro
-	Name     string `json:"name" validate:"required,min=3,max=100" label:"Nome"`
-	Email    string `json:"email" validate:"required,email" label:"E-mail"`
-	Password string `json:"password" validate:"required,min=6,max=32" label:"Senha"`
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email" label:"E-mail"`
-	Password string `json:"password" validate:"required" label:"Senha"`
-}
-
 func (a *App) Register(w http.ResponseWriter, r *http.Request) {
 	var req RegisterRequest
 	if err := web.ReadJSON(r, &req); err != nil {
